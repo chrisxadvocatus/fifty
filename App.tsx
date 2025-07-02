@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import FoodEntryScreen from './src/screens/FoodEntryScreen';
+import AddCustomFoodScreen from './src/screens/AddCustomFoodScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +47,7 @@ export default function App() {
           {props => <HomeScreen {...props} setIsLoggedIn={handleLoginState} />}
         </Stack.Screen>
         <Stack.Screen name="FoodEntryScreen" component={FoodEntryScreen} />
+        <Stack.Screen name="AddCustomFoodScreen" component={AddCustomFoodScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

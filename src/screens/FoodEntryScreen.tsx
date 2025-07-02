@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { searchFoods } from '../services/foodSearch';
 import { REVERSE_MAP_KEY, addFoodEntryForToday, computeFavorite } from '../services/foodStorage';
 
-const categories = [
+export const categories = [
   { label: 'Greens', icon: '🥬' },
   { label: 'Other Veggies', icon: '🥕' },
   { label: 'Legumes', icon: '🫘' },
@@ -20,6 +20,7 @@ const FoodEntryScreen = ({ navigation }: { navigation: any }) => {
   const [feedback, setFeedback] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(categories[0].label);
   const [favoriteFoods, setFavoriteFoods] = useState<string[]>([]);
+  const [todaysFoods, setTodaysFoods] = useState<string[]>([]);
 
   useEffect(() => {
     const loadFoods = async () => {
@@ -27,6 +28,15 @@ const FoodEntryScreen = ({ navigation }: { navigation: any }) => {
       if (reverseMapStr) {
         const reverseMap = JSON.parse(reverseMapStr);
         setAllFoods(Object.keys(reverseMap));
+      }
+      // Load today's foods
+      const today = new Date().toISOString().slice(0, 10);
+      const entriesStr = await AsyncStorage.getItem('foodEntries');
+      if (entriesStr) {
+        const entries = JSON.parse(entriesStr);
+        setTodaysFoods(entries[today] || []);
+      } else {
+        setTodaysFoods([]);
       }
     };
     loadFoods();
@@ -52,11 +62,28 @@ const FoodEntryScreen = ({ navigation }: { navigation: any }) => {
     fetchFavorite();
   }, [selectedCategory]);
 
+  const refreshTodaysFoods = async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const entriesStr = await AsyncStorage.getItem('foodEntries');
+    if (entriesStr) {
+      const entries = JSON.parse(entriesStr);
+      setTodaysFoods(entries[today] || []);
+    } else {
+      setTodaysFoods([]);
+    }
+  };
+
   const handleSelectFood = async (food: string) => {
+    if (todaysFoods.includes(food)) {
+      setFeedback('item added already');
+      setTimeout(() => setFeedback(''), 1200);
+      return;
+    }
     await addFoodEntryForToday(food);
     setFeedback(`${food} added for today!`);
     setSearchText('');
     setTimeout(() => setFeedback(''), 1200);
+    refreshTodaysFoods();
   };
 
   return (
@@ -97,11 +124,18 @@ const FoodEntryScreen = ({ navigation }: { navigation: any }) => {
         <Text style={styles.sectionTitle}>Recent / Favorite Foods</Text>
         <View style={styles.recentRow}>
           {favoriteFoods.map(food => (
-            <View key={food} style={styles.recentTile}><Text style={styles.recentText}>{food}</Text></View>
+            <TouchableOpacity
+              key={food}
+              style={[styles.recentTile, todaysFoods.includes(food) && { opacity: 0.5 }]}
+              onPress={() => handleSelectFood(food)}
+              disabled={todaysFoods.includes(food)}
+            >
+              <Text style={styles.recentText}>{food}</Text>
+            </TouchableOpacity>
           ))}
         </View>
       </View>
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddCustomFoodScreen')}>
         <Text style={styles.addButtonText}>+ Add Custom Food</Text>
       </TouchableOpacity>
     </ScrollView>
