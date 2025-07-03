@@ -4,13 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { searchFoods } from '../services/foodSearch';
 import { REVERSE_MAP_KEY, addFoodEntryForToday, computeFavorite } from '../services/foodStorage';
 
+
 export const categories = [
-  { label: 'Greens', icon: '🥬' },
-  { label: 'Other Veggies', icon: '🥕' },
-  { label: 'Legumes', icon: '🫘' },
-  { label: 'Nuts', icon: '🥜' },
-  { label: 'Fruits', icon: '🍎' },
-  { label: 'Grains', icon: '🌾' },
+  { key: 'greens', label: 'Greens', icon: '🥬' },
+  { key: 'otherVeggies', label: 'Other Veggies', icon: '🥕' },
+  { key: 'legumes', label: 'Legumes', icon: '🫘' },
+  { key: 'nuts', label: 'Nuts', icon: '🥜' },
+  { key: 'fruits', label: 'Fruits', icon: '🍎' },
+  { key: 'grains', label: 'Grains', icon: '🌾' },
 ];
 
 const FoodEntryScreen = ({ navigation }: { navigation: any }) => {

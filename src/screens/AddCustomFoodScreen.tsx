@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
-// If not installed, run: npm install @react-native-picker/picker
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Modal, ScrollView } from 'react-native';
 import { categories } from './FoodEntryScreen';
 
 const AddCustomFoodScreen = ({ navigation }: { navigation: any }) => {
-  const [selectedCategory, setSelectedCategory] = useState(categories[0].label);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [foodName, setFoodName] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const selectedLabel = selectedCategory ? categories.find(cat => cat.key === selectedCategory)?.label : null;
 
   return (
     <View style={styles.container}>
@@ -16,17 +17,39 @@ const AddCustomFoodScreen = ({ navigation }: { navigation: any }) => {
       <Image source={require('../assets/cat2.png')} style={styles.catImage} />
       <Text style={styles.title}>Add Custom Food</Text>
       <Text style={styles.label}>Category</Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={selectedCategory}
-          style={styles.picker}
-          onValueChange={(itemValue: string) => setSelectedCategory(itemValue)}
-        >
-          {categories.map((cat) => (
-            <Picker.Item key={cat.label} label={cat.label} value={cat.label} />
-          ))}
-        </Picker>
-      </View>
+      <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
+        <Text style={selectedLabel ? styles.inputText : styles.inputPlaceholder}>
+          {selectedLabel ? selectedLabel : 'Select category'}
+        </Text>
+      </TouchableOpacity>
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ScrollView style={{ maxHeight: 260 }}>
+              {categories.map(cat => (
+                <TouchableOpacity
+                  key={cat.key}
+                  style={styles.modalItem}
+                  onPress={() => {
+                    setSelectedCategory(cat.key);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalItemText}>{cat.icon} {cat.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalCancel}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <Text style={styles.label}>Food Name</Text>
       <TextInput
         style={styles.input}
@@ -49,11 +72,16 @@ const styles = StyleSheet.create({
   catImage: { width: 100, height: 100, marginBottom: 10, borderRadius: 50, borderWidth: 3, borderColor: '#e0c3a3' },
   title: { fontSize: 28, fontWeight: 'bold', color: '#6c4f3d', marginBottom: 18, fontFamily: 'Avenir-Heavy' },
   label: { fontSize: 16, color: '#6c4f3d', marginTop: 18, marginBottom: 6, alignSelf: 'flex-start', marginLeft: 40 },
-  pickerWrapper: { width: 300, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e0c3a3', marginBottom: 10 },
-  picker: { width: 300, height: 44 },
-  input: { width: 300, height: 44, borderColor: '#e0c3a3', borderWidth: 2, borderRadius: 22, paddingHorizontal: 18, marginBottom: 18, backgroundColor: '#fff', fontSize: 18 },
+  input: { width: 300, height: 44, borderColor: '#e0c3a3', borderWidth: 2, borderRadius: 22, paddingHorizontal: 18, marginBottom: 18, backgroundColor: '#fff', fontSize: 18, justifyContent: 'center' },
+  inputText: { fontSize: 18, color: '#6c4f3d' },
+  inputPlaceholder: { fontSize: 18, color: '#aaa' },
   addButton: { backgroundColor: '#f7b2d9', borderRadius: 20, paddingVertical: 14, paddingHorizontal: 40, marginTop: 10, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
   addButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { width: 320, backgroundColor: '#fff', borderRadius: 16, padding: 20, maxHeight: 340, alignItems: 'stretch' },
+  modalItem: { paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  modalItemText: { fontSize: 18, color: '#6c4f3d' },
+  modalCancel: { color: '#f00', fontSize: 16, textAlign: 'center', marginTop: 16 },
 });
 
 export default AddCustomFoodScreen; 
