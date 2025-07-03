@@ -100,6 +100,29 @@ export const getTodaysFoodEntryCount = async (): Promise<number> => {
   return entries[today]?.length || 0;
 };
 
+// Get the count of unique food entries for the last 7 days
+export const getLast7DaysFoodEntryCount = async (): Promise<number> => {
+  const entriesStr = await AsyncStorage.getItem(FOOD_ENTRIES_KEY);
+  if (!entriesStr) return 0;
+  const entries = JSON.parse(entriesStr);
+  const today = new Date();
+  const last7Days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    last7Days.push(d.toISOString().slice(0, 10));
+  }
+  const foodsSet = new Set();
+  for (const day of last7Days) {
+    if (entries[day]) {
+      for (const food of entries[day]) {
+        foodsSet.add(food);
+      }
+    }
+  }
+  return foodsSet.size;
+};
+
 // Compute favorite foods for a category (for now, random up to 3 from the category)
 export const computeFavorite = async (category: string): Promise<string[]> => {
   // In the future, this can use real usage data

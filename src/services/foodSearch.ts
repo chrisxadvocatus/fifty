@@ -4,3 +4,4 @@ export function searchFoods(query: string, allFoods: string[]): string[] {
     food.toLowerCase().includes(query.toLowerCase())
   );
 } 
+

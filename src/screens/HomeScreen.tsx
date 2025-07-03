@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, baseContainer, baseButton, sharedStyles } from '../styles/shared';
-import { getTodaysFoodEntryCount } from '../services/foodStorage';
+import { getTodaysFoodEntryCount, getLast7DaysFoodEntryCount } from '../services/foodStorage';
 
 interface HomeScreenProps {
   setIsLoggedIn: (state: boolean) => void;
@@ -11,16 +11,24 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ setIsLoggedIn, navigation }) => {
   const [todayCount, setTodayCount] = React.useState<number>(0);
+  const [last7DaysCount, setLast7DaysCount] = React.useState<number>(0);
+  const [progressMode, setProgressMode] = React.useState<'daily' | 'weekly'>('daily');
 
   React.useEffect(() => {
-    const fetchCount = async () => {
+    const fetchCounts = async () => {
       const count = await getTodaysFoodEntryCount();
       setTodayCount(count);
+      const weekCount = await getLast7DaysFoodEntryCount();
+      setLast7DaysCount(weekCount);
     };
-    fetchCount();
-    const focusListener = navigation.addListener('focus', fetchCount);
+    fetchCounts();
+    const focusListener = navigation.addListener('focus', fetchCounts);
     return () => focusListener && focusListener();
   }, [navigation]);
+
+  const handleToggleProgressMode = () => {
+    setProgressMode((prev) => (prev === 'daily' ? 'weekly' : 'daily'));
+  };
 
   const handleLogout = async () => {
     await AsyncStorage.setItem('loggedIn', 'false');
@@ -34,9 +42,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setIsLoggedIn, navigation }) =>
       <Text style={styles.greeting}>Hello, User! 🐾</Text>
       <View style={styles.progressBox}>
         <Text style={sharedStyles.boxTitle}>Plant Progress</Text>
-        <Text style={styles.progressText}>Today: {todayCount}/10 plants</Text>
-        <TouchableOpacity style={styles.toggleButton}>
-          <Text style={styles.toggleButtonText}>Daily ▼</Text>
+        {progressMode === 'daily' ? (
+          <Text style={styles.progressText}>Today: {todayCount}/10 plants</Text>
+        ) : (
+          <Text style={styles.progressText}>Last 7 days: {last7DaysCount}/50 plants</Text>
+        )}
+        <TouchableOpacity style={styles.toggleButton} onPress={handleToggleProgressMode}>
+          <Text style={styles.toggleButtonText}>
+            {progressMode === 'daily' ? 'Daily ▼' : 'Last 7 days ▼'}
+          </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.progressBox}>
