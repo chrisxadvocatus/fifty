@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, baseContainer, baseButton, sharedStyles } from '../styles/shared';
 import { getTodaysFoodEntryCount, getLast7DaysFoodEntryCount } from '../services/foodStorage';
@@ -37,36 +37,46 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setIsLoggedIn, navigation }) =>
   };
 
   return (
-    <View style={[baseContainer, styles.container]}>
-      <Image source={require('../assets/cat2.png')} style={styles.catImage} />
-      <Text style={styles.greeting}>Hello, User! 🐾</Text>
-      <View style={styles.progressBox}>
-        <Text style={sharedStyles.boxTitle}>Plant Progress</Text>
-        {progressMode === 'daily' ? (
-          <Text style={styles.progressText}>Today: {todayCount}/10 plants</Text>
-        ) : (
-          <Text style={styles.progressText}>Last 7 days: {last7DaysCount}/50 plants</Text>
-        )}
-        <TouchableOpacity style={styles.toggleButton} onPress={handleToggleProgressMode}>
-          <Text style={styles.toggleButtonText}>
-            {progressMode === 'daily' ? 'Daily ▼' : 'Last 7 days ▼'}
-          </Text>
+    <ScrollView
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'flex-start',
+        paddingVertical: 32,
+      }}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={true}
+    >
+      <View style={[baseContainer, styles.container]}>
+        <Image source={require('../assets/cat2.png')} style={styles.catImage} />
+        <Text style={styles.greeting}>Hello, User! 🐾</Text>
+        <View style={styles.progressBox}>
+          <Text style={sharedStyles.boxTitle}>Plant Progress</Text>
+          {progressMode === 'daily' ? (
+            <Text style={styles.progressText}>Today: {todayCount}/10 plants</Text>
+          ) : (
+            <Text style={styles.progressText}>Last 7 days: {last7DaysCount}/50 plants</Text>
+          )}
+          <TouchableOpacity style={styles.toggleButton} onPress={handleToggleProgressMode}>
+            <Text style={styles.toggleButtonText}>
+              {progressMode === 'daily' ? 'Daily ▼' : 'Last 7 days ▼'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.progressBox}>
+          <Text style={sharedStyles.boxTitle}>Refined Carbs</Text>
+          <Text style={styles.progressText}>Streak: 3 days clean</Text>
+          <TouchableOpacity style={styles.addCarbButton}>
+            <Text style={styles.addCarbButtonText}>I had carbs today</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={[baseButton, styles.foodEntryButton]} onPress={() => navigation.navigate('FoodEntryScreen')}>
+          <Text style={sharedStyles.buttonText}>Add Today's Plants 🍃</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[baseButton, styles.logoutButton]} onPress={handleLogout}>
+          <Text style={sharedStyles.buttonText}>Log Out</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.progressBox}>
-        <Text style={sharedStyles.boxTitle}>Refined Carbs</Text>
-        <Text style={styles.progressText}>Streak: 3 days clean</Text>
-        <TouchableOpacity style={styles.addCarbButton}>
-          <Text style={styles.addCarbButtonText}>I had carbs today</Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity style={[baseButton, styles.foodEntryButton]} onPress={() => navigation.navigate('FoodEntryScreen')}>
-        <Text style={sharedStyles.buttonText}>Add Today's Plants 🍃</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[baseButton, styles.logoutButton]} onPress={handleLogout}>
-        <Text style={sharedStyles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 

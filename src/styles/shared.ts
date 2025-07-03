@@ -19,7 +19,6 @@ export const fonts = {
 };
 
 export const baseContainer = {
-  flex: 1,
   alignItems: 'center' as const,
   backgroundColor: colors.background,
 };

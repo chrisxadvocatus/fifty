@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, Modal, ScrollView } from 'react-native';
 import { categories } from './FoodEntryScreen';
+import { baseContainer } from '../styles/shared';
 
 const AddCustomFoodScreen = ({ navigation }: { navigation: any }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -10,7 +11,7 @@ const AddCustomFoodScreen = ({ navigation }: { navigation: any }) => {
   const selectedLabel = selectedCategory ? categories.find(cat => cat.key === selectedCategory)?.label : null;
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={[baseContainer, styles.container, { flexGrow: 1, minHeight: '100%' }]}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
@@ -61,7 +62,7 @@ const AddCustomFoodScreen = ({ navigation }: { navigation: any }) => {
       <TouchableOpacity style={styles.addButton} onPress={() => navigation.goBack()}>
         <Text style={styles.addButtonText}>Add Food</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
