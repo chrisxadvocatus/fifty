@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { searchFoods } from '../services/foodSearch';
-import { REVERSE_MAP_KEY, addFoodEntryForToday, computeFavorite } from '../services/foodStorage';
+import { REVERSE_MAP_KEY, addFoodEntryForToday, computeFavorite, deleteFoodEntryForToday } from '../services/foodStorage';
 
 
 export const categories = [
@@ -139,6 +139,32 @@ const FoodEntryScreen = ({ navigation }: { navigation: any }) => {
       <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddCustomFoodScreen')}>
         <Text style={styles.addButtonText}>+ Add Custom Food</Text>
       </TouchableOpacity>
+
+      {/* Spacer for more space between Add Custom Food and Today's Foods */}
+      <View style={{ height: 28 }} />
+
+      {/* Today's Foods Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Today's Foods</Text>
+        {todaysFoods.length === 0 ? (
+          <Text style={{ color: '#888', marginTop: 8 }}>No foods added today.</Text>
+        ) : (
+          todaysFoods.map(food => (
+            <View key={food} style={styles.todaysFoodRow}>
+              <Text style={styles.todaysFoodText}>{food}</Text>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={async () => {
+                  await deleteFoodEntryForToday(food);
+                  refreshTodaysFoods();
+                }}
+              >
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
+      </View>
     </ScrollView>
   );
 };
@@ -164,6 +190,10 @@ const styles = StyleSheet.create({
   recentText: { fontSize: 16, color: '#6c4f3d', fontWeight: 'bold' },
   addButton: { backgroundColor: '#f7b2d9', borderRadius: 20, paddingVertical: 14, paddingHorizontal: 40, marginTop: 10, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
   addButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  todaysFoodRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 18, marginBottom: 8, borderWidth: 1, borderColor: '#e0c3a3' },
+  todaysFoodText: { fontSize: 16, color: '#6c4f3d', fontWeight: 'bold' },
+  deleteButton: { backgroundColor: '#f44336', borderRadius: 10, paddingVertical: 4, paddingHorizontal: 14, marginLeft: 12 },
+  deleteButtonText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
 });
 
 export default FoodEntryScreen; 

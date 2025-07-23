@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, baseContainer, baseButton, sharedStyles } from '../styles/shared';
-import { getTodaysFoodEntryCount, getLast7DaysFoodEntryCount } from '../services/foodStorage';
+import { getTodaysFoodEntryCount, getLast7DaysFoodEntryCount, getLast7DaysFoods, getCarbStreak, resetCarbStreak } from '../services/foodStorage';
 
 interface HomeScreenProps {
   setIsLoggedIn: (state: boolean) => void;
@@ -13,6 +13,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setIsLoggedIn, navigation }) =>
   const [todayCount, setTodayCount] = React.useState<number>(0);
   const [last7DaysCount, setLast7DaysCount] = React.useState<number>(0);
   const [progressMode, setProgressMode] = React.useState<'daily' | 'weekly'>('daily');
+  const [last7DaysFoods, setLast7DaysFoods] = React.useState<string[]>([]);
+  const [carbStreak, setCarbStreak] = React.useState<number>(0); // NEW
 
   React.useEffect(() => {
     const fetchCounts = async () => {
@@ -20,6 +22,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setIsLoggedIn, navigation }) =>
       setTodayCount(count);
       const weekCount = await getLast7DaysFoodEntryCount();
       setLast7DaysCount(weekCount);
+      const foods = await getLast7DaysFoods();
+      setLast7DaysFoods(foods);
+      const streak = await getCarbStreak();
+      setCarbStreak(streak);
     };
     fetchCounts();
     const focusListener = navigation.addListener('focus', fetchCounts);
@@ -64,14 +70,33 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setIsLoggedIn, navigation }) =>
         </View>
         <View style={styles.progressBox}>
           <Text style={sharedStyles.boxTitle}>Refined Carbs</Text>
-          <Text style={styles.progressText}>Streak: 3 days clean</Text>
-          <TouchableOpacity style={styles.addCarbButton}>
+          <Text style={styles.progressText}>Streak: {carbStreak} days clean</Text>
+          <TouchableOpacity style={styles.addCarbButton} onPress={async () => { await resetCarbStreak(); setCarbStreak(0); }}>
             <Text style={styles.addCarbButtonText}>I had carbs today</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={[baseButton, styles.foodEntryButton]} onPress={() => navigation.navigate('FoodEntryScreen')}>
           <Text style={sharedStyles.buttonText}>Add Today's Plants 🍃</Text>
         </TouchableOpacity>
+
+        {/* Spacer to match space between progress boxes */}
+        <View style={{ height: 20 }} />
+
+        {/* Last 7 Days Foods List */}
+        <View style={styles.progressBox}>
+          <Text style={sharedStyles.boxTitle}>Foods in the Last 7 Days</Text>
+          {last7DaysFoods.length === 0 ? (
+            <Text style={{ color: '#888', marginTop: 8 }}>No foods added in the last 7 days.</Text>
+          ) : (
+            <View style={styles.foodsList}>
+              {last7DaysFoods.map(food => (
+                <View key={food} style={styles.foodItem}>
+                  <Text style={styles.foodText}>{food}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
         <TouchableOpacity style={[baseButton, styles.logoutButton]} onPress={handleLogout}>
           <Text style={sharedStyles.buttonText}>Log Out</Text>
         </TouchableOpacity>
@@ -92,6 +117,9 @@ const styles = StyleSheet.create({
   addCarbButtonText: { color: colors.text, fontSize: 16, fontWeight: 'bold' },
   logoutButton: { backgroundColor: colors.warning, marginTop: 20 },
   foodEntryButton: { backgroundColor: colors.accent, marginBottom: 10 },
+  foodsList: { width: '100%', marginTop: 8 },
+  foodItem: { backgroundColor: colors.accent, borderRadius: 10, paddingVertical: 6, paddingHorizontal: 14, marginBottom: 6, alignItems: 'center' },
+  foodText: { fontSize: 16, color: '#237a44', fontWeight: 'bold' },
 });
 
 export default HomeScreen; 
